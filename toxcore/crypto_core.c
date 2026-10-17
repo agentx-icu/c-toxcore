@@ -45,14 +45,13 @@ static_assert(CRYPTO_SIGN_PUBLIC_KEY_SIZE == crypto_sign_PUBLICKEYBYTES,
               "CRYPTO_SIGN_PUBLIC_KEY_SIZE should be equal to crypto_sign_PUBLICKEYBYTES");
 static_assert(CRYPTO_SIGN_SECRET_KEY_SIZE == crypto_sign_SECRETKEYBYTES,
               "CRYPTO_SIGN_SECRET_KEY_SIZE should be equal to crypto_sign_SECRETKEYBYTES");
+static_assert(CRYPTO_SIGN_SEED_SIZE == crypto_sign_SEEDBYTES,
+              "CRYPTO_SIGN_SEED_SIZE should be equal to crypto_sign_SEEDBYTES");
 
-bool create_extended_keypair(Extended_Public_Key *pk, Extended_Secret_Key *sk, const Random *rng)
+bool create_extended_keypair_from_seed(Extended_Public_Key *pk, Extended_Secret_Key *sk, const uint8_t *seed)
 {
     /* create signature key pair */
-    uint8_t seed[crypto_sign_SEEDBYTES];
-    random_bytes(rng, seed, crypto_sign_SEEDBYTES);
     crypto_sign_seed_keypair(pk->sig, sk->sig, seed);
-    crypto_memzero(seed, crypto_sign_SEEDBYTES);
 
     /* convert public signature key to public encryption key */
     const int res1 = crypto_sign_ed25519_pk_to_curve25519(pk->enc, pk->sig);
@@ -61,6 +60,15 @@ bool create_extended_keypair(Extended_Public_Key *pk, Extended_Secret_Key *sk, c
     const int res2 = crypto_sign_ed25519_sk_to_curve25519(sk->enc, sk->sig);
 
     return res1 == 0 && res2 == 0;
+}
+
+bool create_extended_keypair(Extended_Public_Key *pk, Extended_Secret_Key *sk, const Random *rng)
+{
+    uint8_t seed[CRYPTO_SIGN_SEED_SIZE];
+    random_bytes(rng, seed, CRYPTO_SIGN_SEED_SIZE);
+    const bool ok = create_extended_keypair_from_seed(pk, sk, seed);
+    crypto_memzero(seed, CRYPTO_SIGN_SEED_SIZE);
+    return ok;
 }
 
 const uint8_t *get_enc_key(const Extended_Public_Key *key)

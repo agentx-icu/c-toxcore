@@ -182,6 +182,66 @@ uint16_t tox_dht_get_num_closelist_announce_capable(const Tox *tox)
     return num_cap;
 }
 
+uint32_t tox_group_seed_size(void)
+{
+    return TOX_GROUP_SEED_SIZE;
+}
+
+Tox_Group_Number tox_group_new_with_seed(Tox *tox, Tox_Group_Privacy_State privacy_state,
+        const uint8_t *group_name, size_t group_name_length,
+        const uint8_t *name, size_t name_length,
+        const uint8_t *seed, Tox_Err_Group_New *error)
+{
+    assert(tox != nullptr);
+
+    if (seed == nullptr) {
+        SET_ERROR_PARAMETER(error, TOX_ERR_GROUP_NEW_INIT);
+        return UINT32_MAX;
+    }
+
+    tox_lock(tox);
+    const int ret = gc_group_add_with_seed(tox->m->group_handler, (Group_Privacy_State) privacy_state,
+                                           group_name, group_name_length, name, name_length, seed);
+    tox_unlock(tox);
+
+    if (ret >= 0) {
+        SET_ERROR_PARAMETER(error, TOX_ERR_GROUP_NEW_OK);
+        return ret;
+    }
+
+    switch (ret) {
+        case -1: {
+            SET_ERROR_PARAMETER(error, TOX_ERR_GROUP_NEW_TOO_LONG);
+            return UINT32_MAX;
+        }
+
+        case -2: {
+            SET_ERROR_PARAMETER(error, TOX_ERR_GROUP_NEW_EMPTY);
+            return UINT32_MAX;
+        }
+
+        case -3: {
+            SET_ERROR_PARAMETER(error, TOX_ERR_GROUP_NEW_INIT);
+            return UINT32_MAX;
+        }
+
+        case -4: {
+            SET_ERROR_PARAMETER(error, TOX_ERR_GROUP_NEW_STATE);
+            return UINT32_MAX;
+        }
+
+        case -5: {
+            SET_ERROR_PARAMETER(error, TOX_ERR_GROUP_NEW_ANNOUNCE);
+            return UINT32_MAX;
+        }
+    }
+
+    /* can't happen */
+    LOGGER_FATAL(tox->m->log, "impossible return value: %d", ret);
+
+    return UINT32_MAX;
+}
+
 size_t tox_group_peer_get_ip_address_size(const Tox *tox, uint32_t group_number, uint32_t peer_id,
         Tox_Err_Group_Peer_Query *error)
 {

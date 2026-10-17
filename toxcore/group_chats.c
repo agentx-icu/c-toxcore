@@ -7523,6 +7523,13 @@ int gc_group_add(GC_Session *c, Group_Privacy_State privacy_state,
                  const uint8_t *group_name, uint16_t group_name_length,
                  const uint8_t *nick, size_t nick_length)
 {
+    return gc_group_add_with_seed(c, privacy_state, group_name, group_name_length, nick, nick_length, nullptr);
+}
+
+int gc_group_add_with_seed(GC_Session *c, Group_Privacy_State privacy_state,
+                           const uint8_t *group_name, uint16_t group_name_length,
+                           const uint8_t *nick, size_t nick_length, const uint8_t *seed)
+{
     if (group_name_length > MAX_GC_GROUP_NAME_SIZE) {
         return -1;
     }
@@ -7554,7 +7561,11 @@ int gc_group_add(GC_Session *c, Group_Privacy_State privacy_state,
     crypto_memlock(&chat->chat_secret_key, sizeof(chat->chat_secret_key));
 
     /* Ensure we have a valid keypair for the group. */
-    if (!create_extended_keypair(&chat->chat_public_key, &chat->chat_secret_key, chat->rng)) {
+    const bool keypair_ok = seed == nullptr
+                            ? create_extended_keypair(&chat->chat_public_key, &chat->chat_secret_key, chat->rng)
+                            : create_extended_keypair_from_seed(&chat->chat_public_key, &chat->chat_secret_key, seed);
+
+    if (!keypair_ok) {
         crypto_memunlock(&chat->chat_secret_key, sizeof(chat->chat_secret_key));
         group_delete(c, chat);
         return -3;

@@ -573,6 +573,14 @@ void gc_group_save(const GC_Chat *_Nonnull chat, Bin_Pack *_Nonnull bp);
  */
 int gc_group_add(GC_Session *_Nonnull c, Group_Privacy_State privacy_state, const uint8_t *_Nonnull group_name, uint16_t group_name_length, const uint8_t *_Nonnull nick, size_t nick_length);
 
+/** @brief Same as `gc_group_add`, but the group keypair (and therefore the
+ * Chat ID) is derived from `seed` (CRYPTO_SIGN_SEED_SIZE bytes) instead of
+ * being drawn from the RNG. A null `seed` behaves exactly like `gc_group_add`.
+ *
+ * Return values are those of `gc_group_add`.
+ */
+int gc_group_add_with_seed(GC_Session *_Nonnull c, Group_Privacy_State privacy_state, const uint8_t *_Nonnull group_name, uint16_t group_name_length, const uint8_t *_Nonnull nick, size_t nick_length, const uint8_t *_Nullable seed);
+
 /** @brief Joins a group designated by `chat_id`.
  *
  * This function creates a new GC_Chat object, adds it to the chats array, and sends a DHT

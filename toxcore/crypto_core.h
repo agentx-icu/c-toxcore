@@ -39,6 +39,11 @@ extern "C" {
 #define CRYPTO_SIGN_SECRET_KEY_SIZE    64
 
 /**
+ * @brief The number of bytes in a signature key seed.
+ */
+#define CRYPTO_SIGN_SEED_SIZE          32
+
+/**
  * @brief The number of bytes in a Tox public key used for encryption.
  */
 #define CRYPTO_PUBLIC_KEY_SIZE         32
@@ -288,6 +293,23 @@ typedef struct Extended_Secret_Key {
  * @retval true on success.
  */
 bool create_extended_keypair(Extended_Public_Key *_Nonnull pk, Extended_Secret_Key *_Nonnull sk, const Random *_Nonnull rng);
+
+/**
+ * @brief Creates an extended keypair deterministically from a seed.
+ *
+ * Same key material as `create_extended_keypair`, but the ed25519 keypair is
+ * derived from `seed` instead of from the random number generator. Two calls
+ * with the same seed produce the same keys. Intended for rendezvous-style
+ * group chats whose Chat ID every participant can derive independently.
+ *
+ * @param[out] pk The buffer where the public key will be stored.
+ * @param[out] sk The buffer where the secret key will be stored.
+ * @param seed The signature key seed. Must be CRYPTO_SIGN_SEED_SIZE bytes.
+ *
+ * @retval true on success.
+ */
+bool create_extended_keypair_from_seed(Extended_Public_Key *_Nonnull pk, Extended_Secret_Key *_Nonnull sk,
+                                       const uint8_t *_Nonnull seed);
 
 /** Functions for groupchat extended keys */
 const uint8_t *_Nonnull get_enc_key(const Extended_Public_Key *_Nonnull key);

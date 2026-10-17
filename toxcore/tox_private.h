@@ -222,6 +222,41 @@ uint16_t tox_dht_get_num_closelist_announce_capable(const Tox *_Nonnull tox);
 
 /*******************************************************************************
  *
+ * :: Seeded group chats
+ *
+ ******************************************************************************/
+
+/**
+ * The number of bytes in a group chat key seed.
+ */
+#define TOX_GROUP_SEED_SIZE 32
+
+uint32_t tox_group_seed_size(void);
+
+/**
+ * Creates a new group chat whose keypair, and therefore whose Chat ID, is
+ * derived from `seed` instead of being drawn from the random number
+ * generator. Every client that uses the same seed obtains the same Chat ID,
+ * which lets clients that never met agree on a rendezvous group without a
+ * directory. Everyone who knows the seed also holds the founder secret, so
+ * such a group has no moderation boundary; treat it as untrusted transport.
+ *
+ * Apart from the key derivation this behaves exactly like `tox_group_new`,
+ * including the caller's Founder role and the error values.
+ *
+ * @param seed The key seed. Must be TOX_GROUP_SEED_SIZE bytes. A NULL seed
+ *   fails with TOX_ERR_GROUP_NEW_INIT.
+ *
+ * @return group_number on success, UINT32_MAX on failure.
+ */
+Tox_Group_Number tox_group_new_with_seed(
+    Tox *_Nonnull tox, Tox_Group_Privacy_State privacy_state,
+    const uint8_t *_Nullable group_name, size_t group_name_length,
+    const uint8_t *_Nullable name, size_t name_length,
+    const uint8_t *_Nullable seed, Tox_Err_Group_New *_Nullable error);
+
+/*******************************************************************************
+ *
  * :: Network profiler
  *
  ******************************************************************************/

@@ -17,6 +17,7 @@ TESTS = \
 	encryptsave_test \
 	file_saving_test \
 	forwarding_test \
+	group_seeded_test \
 	invalid_tcp_proxy_test \
 	invalid_udp_proxy_test \
 	network_test \
@@ -116,6 +117,10 @@ file_saving_test_LDADD = $(AUTOTEST_LDADD)
 forwarding_test_SOURCES = ../auto_tests/forwarding_test.c
 forwarding_test_CFLAGS = $(AUTOTEST_CFLAGS)
 forwarding_test_LDADD = $(AUTOTEST_LDADD)
+
+group_seeded_test_SOURCES = ../auto_tests/group_seeded_test.c
+group_seeded_test_CFLAGS = $(AUTOTEST_CFLAGS)
+group_seeded_test_LDADD = $(AUTOTEST_LDADD)
 
 invalid_tcp_proxy_test_SOURCES = ../auto_tests/invalid_tcp_proxy_test.c
 invalid_tcp_proxy_test_CFLAGS = $(AUTOTEST_CFLAGS)
